@@ -4,626 +4,568 @@
   <meta charset="utf-8">
   <title>Price Helper</title>
   <style type="text/css">
-
-    html, body {
+    html {
       width: 100%;
-      padding: 0;
-      margin: 0;
-    }
-
+margin: 0; }
+    body {
+      padding: 0 100px;
+margin: 0; }
     table {
       width: 100%;
-      border: 0;
-    }
-
+border: 0; }
     table.rares {
       width: 50%;
       border: 0;
       float: left;
-      padding: 2% 6%;
-    }
-
-    td {
+      margin: 15px 0 30px 0;
+}
+    td, th {
       width: 8.333333333333%;
       text-align: center;
       font-size: 100px;
-      padding-top: 30px;
+      font-weight: normal;
+}
+    table.rares td {
+      padding-top: 20px;
     }
-
-    .small-text {
+    table.rares th {
+      padding-top: 20px;
+      padding-bottom: 30px;
+    }
+    .regular-text {
       font-size: 30px;
     }
-
-    .tiny-text {
+    .small-text {
       font-size: 20px;
     }
-
-    .grey {
+.grey {
       color: #aaaaaa;
     }
 
-    .blue {
+ .blue {
       color: #62a4da;
     }
-
-    .pink {
+.pink {
       color: #fb3e8d;
     }
-
-    .d-none {
+.gold {
+      color: #f0bc00;
+    }
+.silver {
+      color: #aeaeae;
+    }
+.copper {
+      color: #d59f61;
+    }
+    .checkbox {
+      vertical-align: inherit;
+      height: 14px;
+      margin-top: -20px;
+}
+.d-none {
       display: none;
     }
-
+.c-pointer {
+      cursor: pointer;
+    }
     input {
       width: 100%;
       text-align: center;
       border: 0;
-    }
-
+}
   </style>
 </head>
 <body>
+<table> <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td><input id="efficient" class="checkbox" type="checkbox"
+value="1" checked="checked" /></td>
+      <td><img id="refresh"
+src="https://render.guildwars2.com/file/18CE5D78317265000CF3C23ED76AB3
+CEE86BA60E/65941.png" class="c-pointer" /></td>
+      <td id="ecto-difference" class="regular-text"></td>
+      <td id="peak-ecto-price" class="regular-text c-pointer"></td>
 
-  <table>
-    <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td id="rares-sum" class="small-text" style="color: #aaaaaa">0c</td>
-      <td><img src="https://render.guildwars2.com/file/18CE5D78317265000CF3C23ED76AB3CEE86BA60E/65941.png" /></td>
-      <!-- <td id="ecto-margin" class="small-text" style="color: #aaaaaa">0%</td> -->
-      <td id="ecto-price" class="small-text" style="color: #aaaaaa">0c</td>
-      <td></td>
-      <td></td>
+      <td id="ecto-price" class="regular-text c-pointer"></td>
+      <td class="small-text"><input id="target-ecto-price"
+type="number" value="0" size="4" /></td>
       <td></td>
     </tr>
-
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td class="tiny-text"><input id="target-ecto-price" type="text" value="0" size="4" /></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td><img
+src="https://render.guildwars2.com/file/E4B016CDF70960156803FD04C425BF
+9A4C382D95/2063466.png" /></td>
+      <td id="peak-charm-price" class="regular-text"></td>
+      <td id="charm-price" class="regular-text"></td>
+      <td><img
+src="https://render.guildwars2.com/file/C4600FB8F97F2618F4DFA2CE9FD2C6
+69FAE9DE6F/65949.png" /></td>
+      <td id="peak-hardened-leather-price" class="regular-text"></td>
+      <td id="hardened-leather-price" class="regular-text"></td>
+      <td><img
+src="https://render.guildwars2.com/file/CC3A2CAADBB2F2B13B1E70079E7E20
+7B08D16E93/65946.png" /></td>
+      <td id="peak-thick-leather-price" class="regular-text"></td>
+      <td id="thick-leather-price" class="regular-text"></td>
       <td></td>
     </tr>
-    
-    <!--
-    <tr>
-      <td></td>
-      <td><img src="https://render.guildwars2.com/file/E4B016CDF70960156803FD04C425BF9A4C382D95/2063466.png" /></td>
-      <td id="brillant-margin" style="color: #aaaaaa">0%</td>
-      <td id="brillant-threshold" class="small-text" style="color: #aaaaaa">0c</td>
-      <td></td>
-    </tr>
-    
-    <tr>
-      <td colspan="5" class="tiny-text">lys dw nth adl lic bef gna rat</td>
-    </tr>
-    -->
   </table>
-
   <table class="rares" id="rares-sell"></table>
   <table class="rares" id="rares-buy"></table>
-
   <script type="text/javascript">
   (() => {
-
     const state = {
-      prices: {}
+      prices: {},
+      peakPrices: {}
     };
-
     const motePrice = 8;
     const salvageCost = 60;
-    const targetEctoPrice = 2300;
     const tradingPostNetProfitRatio = 0.85;
-
+    const minimumBuySupply = 200;
+    const rareBuyOrderVolume = 111;
+    const minimumBuyProfit = 10;
+    const minimumSellProfit = 1000;
     const init = {cache: "no-store"};
     const items = [
       "19721", // ecto
       "89103", // charm
+      "19729", // thickLeather
+      "19732", // hardenedLeather
       "19700", // mithrilOre
       "19701", // orichalcumOre
       "19748", // silk
-      "19745", // gossamer
-      "19729", // thickLeather
-      "19732" // hardenedLeather
-    ];
-
-    const rares = {
-      "1589": {
-        "name": "Wütend n-Hose Göttlichkeit",
-        "19729": 1.54,
-        "19732": 0.15
-      },
-      "45128": {
-        "name": "Grausam r-Helm Adlers",
-        "19729": 1.64,
-        "19732": 0.16
-      },
-      "1623": {
-        "name": "Klerikal r-Stiefel Grenth",
-        "19729": 1.65,
-        "19732": 0.16
-      },
-      "1303": {
-        "name": "Schaman Besch Wams Lyssa",
-        "19700": 1.71,
-        "19701": 0.17
-      },
-      "2682": {
-        "name": "Schaman r-Hose Grenth",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "529": {
-        "name": "Schaman r-Brust Göttlichkeit",
-        "19748": 2.75,
-        "19745": 0.28
-      },
-      "2670": {
-        "name": "Berserk r-Hose Befallenen",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "1132": {
-        "name": "Schaman n-Schulter Dwayna",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "45123": {
-        "name": "Grausam n-Wams Gnade",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "1833": {
-        "name": "Klerikal n-Wams Lyssa",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "45113": {
-        "name": "Grausam r-Hose Gnade",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "1626": {
-        "name": "Klerikal Besch Stulpen Gnade",
-        "19700": 1.07,
-        "19701": 0.11
-      },
-      "1835": {
-        "name": "Klerikal n-Wams Göttlichkeit",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "2683": {
-        "name": "Schaman r-Hose Grenth",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "983": {
-        "name": "Wütend r-Schuhe Dwayna",
-        "19748": 1.83,
-        "19745": 0.18
-      },
-      "685": {
-        "name": "Faulend Besch Bein Schwarmes",
-        "19700": 1.06,
-        "19701": 0.11
-      },
-      "518": {
-        "name": "Wütend r-Brustschutz Lyssa",
-        "19748": 2.75,
-        "19745": 0.28
-      },
-      "745": {
-        "name": "Schaman Besch Bein Adlers",
-        "19700": 1.06,
-        "19701": 0.11
-      },
-      "45122": {
-        "name": "Grausam n-Wams Lich",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "1612": {
-        "name": "Schaman r-Stiefel Lyssa",
-        "19729": 1.65,
-        "19732": 0.16
-      },
-      "505": {
-        "name": "Faulend r-Brust Lyssa",
-        "19748": 2.75,
-        "19745": 0.28
-      },
-      "985": {
-        "name": "Wütend r-Schuhe Grenth",
-        "19748": 1.83,
-        "19745": 0.18
-      },
-      "2675": {
-        "name": "Faulend r-Hose Göttlichkeit",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "526": {
-        "name": "Schaman r-Brust Adlers",
-        "19748": 2.75,
-        "19745": 0.28
-      },
-      "1999": {
-        "name": "Wütend n-Hand Befallenen",
-        "19729": 1.65,
-        "19732": 0.17
-      },
-      "1831": {
-        "name": "Klerikal n-Wams Dwayna",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "2680": {
-        "name": "Wütend r-Hose Gnade",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "1822": {
-        "name": "Wütend n-Wams Grenth",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "1810": {
-        "name": "Faulend n-Wams Dwayna",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "1824": {
-        "name": "Berserk Besch Helm Befallenen",
-        "19700": 1.23,
-        "19701": 0.12
-      },
-      "558": {
-        "name": "Berserk r-Helm Dwayna",
-        "19729": 1.64,
-        "19732": 0.16
-      },
-      "1982": {
-        "name": "Berserk n-Hand Grenth",
-        "19729": 1.65,
-        "19732": 0.17
-      },
-      "1094": {
-        "name": "Berserk n-Schulter Schwarmes",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "992": {
-        "name": "Schaman r-Schuhe Göttlichkeit",
-        "19748": 1.83,
-        "19745": 0.18
-      },
-      "45124": {
-        "name": "Grausam n-Hand Adlers",
-        "19729": 1.65,
-        "19732": 0.17
-      },
-      "1305": {
-        "name": "Klerikal Besch Wams Grenth",
-        "19700": 1.71,
-        "19701": 0.17
-      },
-      "2828": {
-        "name": "Wütend r-Überwurf Lyssa",
-        "19748": 1.77,
-        "19745": 0.18
-      },
-      "1561": {
-        "name": "Berserk n-Hose Schwarmes",
-        "19729": 1.54,
-        "19732": 0.15
-      },
-      "1809": {
-        "name": "Faulend n-Wams Grenth",
-        "19729": 2.23,
-        "19732": 0.22
-      },
-      "1127": {
-        "name": "Wütend n-Schulter Grenth",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "2092": {
-        "name": "Faulend Besch Bein Befallenen",
-        "19700": 1,
-        "19701": 0.1
-      },
-      "1151": {
-        "name": "Klerikal n-Schulter Lyssa",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "45094": {
-        "name": "Grausam Besch Bein Schwarme",
-        "19700": 1,
-        "19701": 0.1
-      },
-      "1293": {
-        "name": "Wütend Besch Wams Dwayna",
-        "19700": 1.71,
-        "19701": 0.17
-      },
-      "566": {
-        "name": "Faulend r-Helm Göttlichkeit",
-        "19729": 1.64,
-        "19732": 0.16
-      },
-      "1105": {
-        "name": "Faulend n-Schulter Befallenen",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "1992": {
-        "name": "Faulend n-Hand Adlers",
-        "19729": 1.65,
-        "19732": 0.17
-      },
-      "530": {
-        "name": "Klerikal r-Brust Adlers",
-        "19748": 2.75,
-        "19745": 0.28
-      },
-      "1565": {
-        "name": "Faulend r-Stiefel Lyssa",
-        "19729": 1.65,
-        "19732": 0.16
-      },
-      "1298": {
-        "name": "Schaman Besch Wams Lyssa",
-        "19700": 1.71,
-        "19701": 0.17
-      },
-      "1089": {
-        "name": "Berserk n-Schulter Gnade",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "500": {
-        "name": "Faulend r-Brust Dwayna",
-        "19748": 2.75,
-        "19745": 0.28
-      },
-      "1147": {
-        "name": "Klerikal n-Schulter Adlers",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "595": {
-        "name": "Schaman r-Helm Lyssa",
-        "19729": 1.64,
-        "19732": 0.16
-      },
-      "1107": {
-        "name": "Faulend n-Schulter Dwayna",
-        "19729": 1.62,
-        "19732": 0.16
-      },
-      "45127": {
-        "name": "Grausam r-Helm Göttlichkeit",
-        "19729": 1.64,
-        "19732": 0.16
-      },
-      "2681": {
-        "name": "Schaman r-Hose Schwarmes",
-        "19748": 1.91,
-        "19745": 0.19
-      },
-      "1609": {
-        "name": "Klerikal n-Hose Schwarmes",
-        "19729": 1.54,
-        "19732": 0.15
-      },
-      "2517": {
-        "name": "Faulend r-Maske Befallenen",
-        "19748": 1.65,
-        "19745": 0.16
-      },
-      "1279": {
-        "name": "Berserk Besch Wams Adlers",
-        "19700": 1.71,
-        "19701": 0.17
-      },
-      "2101": {
-        "name": "Wütend Besch Bein Adlers",
-        "19700": 1,
-        "19701": 0.1
-      },
-      "751": {
-        "name": "Klerikal Besch Bein Rata Sum",
-        "19700": 1.06,
-        "19701": 0.11
-      },
-      "730": {
-        "name": "Schaman Besch Bein Adlers",
-        "19700": 1.06,
-        "19701": 0.11
-      },
-      "2528": {
-        "name": "Klerikal r-Maske Göttlichkeit",
-        "19748": 1.65,
-        "19745": 0.16
-      },
-      "1840": {
-        "name": "Wütend Besch Helm Rata Sum",
-        "19700": 1.23,
-        "19701": 0.12
-      },
-      "572": {
-        "name": "Faulend r-Helm Schwarmes",
-        "19729": 1.64,
-        "19732": 0.16
-      },
-      "1575": {
-        "name": "Faulend n-Hose Schwarmes",
-        "19729": 1.54,
-        "19732": 0.15
-      },
-      "45109": {
-        "name": "Grausam r-Maske Lyssa",
-        "19748": 1.65,
-        "19745": 0.16
-      },
-      "2004": {
-        "name": "Klerikal n-Hand Adlers",
-        "19729": 1.65,
-        "19732": 0.17
-      }
-    };
-
-    const formatCurrency = (base) => {
-      const gold = Math.trunc(base / 10000);
-      const silver = Math.trunc((base - (gold * 10000)) / 100);
-      const copper = Math.trunc(base - (gold * 10000) - (silver * 100));
-
+      "19745" // gossamer
+];
+ 
+const rares = {
+  "1589": {
+    "name": "Wütend n-Hose Göttlichkeit",
+    "19729": 1.54,
+    "19732": 0.15
+}, "45128": {
+    "name": "Grausam r-Maske Adlers",
+    "19729": 1.64,
+    "19732": 0.16
+}, "1303": {
+    "name": "Schaman Besch Wams Lyssa",
+    "19700": 1.71,
+    "19701": 0.17
+}, "2682": {
+    "name": "Schaman r-Hose Grenth",
+    "19748": 1.91,
+    "19745": 0.19
+}, "529": {
+    "name": "Schaman r-Brust Göttlichkeit",
+    "19748": 2.75,
+    "19745": 0.28
+}, "2670": {
+    "name": "Berserk r-Hose Befallenen",
+    "19748": 1.91,
+    "19745": 0.19
+}, "45123": {
+    "name": "Grausam n-Wams Gnade",
+    "19729": 2.23,
+    "19732": 0.22
+}, "1833": {
+    "name": "Klerikal n-Wams Lyssa",
+    "19729": 2.23,
+    "19732": 0.22
+}, "45113": {
+    "name": "Grausam r-Hose Gnade",
+    "19748": 1.91,
+    "19745": 0.19
+}, "1626": {
+    "name": "Klerikal Besch Stulpen Gnade",
+    "19700": 1.07,
+    "19701": 0.11
+}, "1835": {
+    "name": "Klerikal n-Wams Göttlichkeit",
+    "19748": 1.91,
+    "19745": 0.19
+}, "2683": {
+ 
+  "name": "Schaman r-Hose Grenth",
+  "19729": 2.23,
+  "19732": 0.22
+}, "983": {
+  "name": "Wütend r-Schuhe Dwayna",
+  "19748": 1.83,
+  "19745": 0.18
+}, "518": {
+  "name": "Wütend r-Brustschutz Lyssa",
+  "19748": 2.75,
+  "19745": 0.28
+}, "45122": {
+  "name": "Grausam n-Wams Lich",
+  "19729": 2.23,
+  "19732": 0.22
+}, "505": {
+  "name": "Faulend r-Brust Lyssa",
+  "19748": 2.75,
+  "19745": 0.28
+}, "985": {
+  "name": "Wütend r-Schuhe Grenth",
+  "19748": 1.83,
+  "19745": 0.18
+}, "2675": {
+  "name": "Faulend r-Hose Göttlichkeit",
+  "19748": 1.91,
+  "19745": 0.19
+}, "526": {
+  "name": "Schaman r-Brust Adlers",
+  "19748": 2.75,
+  "19745": 0.28
+}, "1999": {
+  "name": "Wütend n-Hand Befallenen",
+  "19729": 1.65,
+  "19732": 0.17
+}, "2680": {
+  "name": "Wütend r-Hose Gnade",
+  "19748": 1.91,
+  "19745": 0.19
+}, "1822": {
+  "name": "Wütend n-Wams Grenth",
+  "19729": 2.23,
+  "19732": 0.22
+}, "1810": {
+  "name": "Faulend n-Wams Dwayna",
+  "19729": 2.23,
+ 
+    "19732": 0.22
+  },
+  "558": {
+    "name": "Berserk r-Maske Dwayna",
+    "19729": 1.64,
+    "19732": 0.16
+}, "1982": {
+    "name": "Berserk n-Hand Grenth",
+    "19729": 1.65,
+    "19732": 0.17
+}, "1094": {
+    "name": "Berserk n-Schulter Schwarmes",
+    "19729": 1.62,
+    "19732": 0.16
+}, "992": {
+    "name": "Schaman r-Schuhe Göttlichkeit",
+    "19748": 1.83,
+    "19745": 0.18
+}, "1127": {
+    "name": "Wütend n-Schulter Grenth",
+    "19729": 1.62,
+    "19732": 0.16
+}, "1151": {
+    "name": "Klerikal n-Schulter Lyssa",
+    "19729": 1.62,
+    "19732": 0.16
+}, "1147": {
+    "name": "Klerikal n-Schulter Adlers",
+    "19729": 1.62,
+    "19732": 0.16
+}, "1609": {
+    "name": "Klerikal n-Hose Schwarmes",
+    "19729": 1.54,
+    "19732": 0.15
+}, "745": {
+    "name": "Schaman Besch Bein Adlers",
+    "19700": 1.06,
+    "19701": 0.11
+}, "2004": {
+    "name": "Klerikal n-Hand Adlers",
+    "19729": 1.65,
+    "19732": 0.17
+} };
+const formatCurrency = (base) => {
+  const gold = Math.trunc(base / 10000);
+  const silver = Math.trunc((base - (gold * 10000)) / 100);
+ 
+      const copper = Math.trunc(base - (gold * 10000) - (silver *
+100));
       if (gold === 0 && silver === 0) {
-        return `${copper}c`;
+        return `<span class="copper">${copper}<span class="small-
+text">c</span></span>`;
       }
-
       if (gold === 0) {
-        return `${silver}s ${copper}c`;
-      }
-
-      return `${gold}g ${silver}s ${copper}c`;
-    };
-
+        return `<span class="silver">${silver}<span class="small-
+text">s</span></span> <span class="copper">${copper}<span
+class="small-text">c</span></span>`;
+}
+      return `<span class="gold">${gold}<span class="small-
+text">g</span></span> <span class="silver">${silver}<span
+class="small-text">s</span></span> <span class="copper">${copper}<span
+class="small-text">c</span></span>`;
+};
     const formatPercent = (base) => {
       const percent = (base * 100).toFixed(2);
-
-      return `${percent}%`;
+      return `${percent}<span class="small-text">%</span>`;
     };
-
-    const renderEctoProfit = () => {
+    const renderEcto = () => {
       const ectoPrice = state.prices["19721"].sell;
-      const targetEctoPrice = parseInt(document.getElementById("target-ecto-price").value);
+      const peakEctoPrice = state.peakPrices["19721"].sell;
+      const targetEctoPrice =
+parseInt(document.getElementById("target-ecto-price").value) ||
+ectoPrice;
+      const charmPrice = state.prices["89103"].sell;
+      const peakCharmPrice = state.peakPrices["89103"].sell;
+      const hardenedLeatherPrice = state.prices["19732"].sell;
+      const peakHardenedLeatherPrice = state.peakPrices["19732"].sell;
+      const thickLeatherPrice = state.prices["19729"].sell;
+      const peakThickLeatherPrice = state.peakPrices["19729"].sell;
+      const difference = targetEctoPrice - peakEctoPrice;
+      const differenceFactor = difference / peakEctoPrice;
+      const differenceState = differenceFactor > 0 ? "pink" : "grey";
+      document.getElementById("ecto-difference").innerHTML =
+formatPercent(differenceFactor);
+      document.getElementById("ecto-
+difference").classList.remove("pink", "grey");
+      document.getElementById("ecto-
+difference").classList.add(differenceState);
+      document.getElementById("peak-ecto-price").innerHTML =
+formatCurrency(peakEctoPrice);
+      document.getElementById("ecto-price").innerHTML =
+formatCurrency(ectoPrice);
+      document.getElementById("target-ecto-price").value =
+targetEctoPrice;
+ document.getElementById("peak-charm-price").innerHTML =
 
-      const profit = ectoPrice - targetEctoPrice;
-      const profitMargin = profit / targetEctoPrice;
-      const profitState = profitMargin > 0 ? "#fb3e8d" : "#aaaaaa";
-
-      // document.getElementById("ecto-margin").innerHTML = formatPercent(profitMargin);
-      // document.getElementById("ecto-margin").style.color = profitState;
-      document.getElementById("ecto-price").innerHTML = formatCurrency(ectoPrice);
-      document.getElementById("ecto-price").style.color = profitState;
-    };
-
-    /*
-    const renderBrillantRareProfit = () => {
-      const charmPrice = state.prices["89103"].buy;
-      const mithrilOrePrice = state.prices["19700"].buy;
-      const silkPrice = state.prices["19748"].buy;
-      const thickLeatherPrice = state.prices["19729"].buy;
-      const orichalcumOrePrice = state.prices["19701"].buy;
-      const gossamerPrice = state.prices["19745"].buy;
-      const hardenedLeatherPrice = state.prices["19732"].buy;
-
-      const averageBrillantRarePrice = 2000;
-      const targetEctoPrice = parseInt(document.getElementById("target-ecto-price").value);
-
-      const brillantRareThreshold = Math.round(
-        (
-          targetEctoPrice * 0.875
-          + mithrilOrePrice * 0.328 // 0.32
-          + silkPrice * 0.69 // 0.53
-          + thickLeatherPrice * 0.484 // 0.47
-          + orichalcumOrePrice * 0.047 // 0.11
-          + gossamerPrice * 0.082 // 0.18
-          + hardenedLeatherPrice * 0.036 // 0.16
-          + charmPrice * 0.023 // 0.032
-          + motePrice * 1.522
-        ) * tradingPostNetProfitRatio
-        - salvageCost
-      );
-
-      const profit = brillantRareThreshold - averageBrillantRarePrice;
-      const profitMargin = profit / averageBrillantRarePrice;
-      const profitState = profitMargin > 0 ? "#62a4da" : "#aaaaaa";
-
-      document.getElementById("brillant-margin").innerHTML = formatPercent(profitMargin);
-      document.getElementById("brillant-margin").style.color = profitState;
-      document.getElementById("brillant-threshold").innerHTML = formatCurrency(brillantRareThreshold);
-      document.getElementById("brillant-threshold").style.color = profitState;
-    };
-    */
-
+formatCurrency(peakCharmPrice);
+      document.getElementById("charm-price").innerHTML =
+formatCurrency(charmPrice);
+      document.getElementById("peak-hardened-leather-price").innerHTML
+= formatCurrency(peakHardenedLeatherPrice);
+      document.getElementById("hardened-leather-price").innerHTML =
+formatCurrency(hardenedLeatherPrice);
+      document.getElementById("peak-thick-leather-price").innerHTML =
+formatCurrency(peakThickLeatherPrice);
+      document.getElementById("thick-leather-price").innerHTML =
+formatCurrency(thickLeatherPrice);
+};
     const renderRares = () => {
       const charmPrice = state.prices["89103"].buy;
-
       const mithrilOrePrice = state.prices["19700"].buy;
       const silkPrice = state.prices["19748"].buy;
       const thickLeatherPrice = state.prices["19729"].buy;
       const orichalcumOrePrice = state.prices["19701"].buy;
       const gossamerPrice = state.prices["19745"].buy;
       const hardenedLeatherPrice = state.prices["19732"].buy;
-
-      const targetEctoPrice = parseInt(document.getElementById("target-ecto-price").value);
-
-      const results = Object.keys(rares).map((id) => {
+      const targetEctoPrice =
+parseInt(document.getElementById("target-ecto-price").value);
+      const isEfficient =
+document.getElementById("efficient").checked;
+      const resultsBuy = Object.keys(rares).reduce((accumulatorBuy,
+id) => {
         const rare = rares[id];
         const threshold = Math.round(
           (
             targetEctoPrice * 0.875
             + charmPrice * 0.032
             + motePrice * 1.6
-            + (rare["19700"] === undefined ? 0 : mithrilOrePrice * rare["19700"])
-            + (rare["19701"] === undefined ? 0 : orichalcumOrePrice * rare["19701"])
-            + (rare["19729"] === undefined ? 0 : thickLeatherPrice * rare["19729"])
-            + (rare["19732"] === undefined ? 0 : hardenedLeatherPrice * rare["19732"])
-            + (rare["19745"] === undefined ? 0 : gossamerPrice * rare["19745"])
-            + (rare["19748"] === undefined ? 0 : silkPrice * rare["19748"])
+            + (rare["19700"] === undefined ? 0 : mithrilOrePrice *
+rare["19700"])
+            + (rare["19701"] === undefined ? 0 : orichalcumOrePrice *
+rare["19701"])
+            + (rare["19729"] === undefined ? 0 : thickLeatherPrice *
+rare["19729"])
+            + (rare["19732"] === undefined ? 0 : hardenedLeatherPrice
+* rare["19732"])
+            + (rare["19745"] === undefined ? 0 : gossamerPrice *
+rare["19745"])
+            + (rare["19748"] === undefined ? 0 : silkPrice *
+rare["19748"])
           ) * tradingPostNetProfitRatio
           - salvageCost
         );
-
-        const profitBuy = threshold - state.prices[id].buy;
-        const profitSell = state.prices[id].sellListings.reduce((a, b) => a + (b.unit_price > threshold ? 0 : ((threshold - b.unit_price) * b.quantity)), 0);
-
-        return {
-          id,
-          markupBuy:
+        const profit = threshold - state.prices[id].buy;
+        return [
+          ...accumulatorBuy,
+ 
+{
+id,
+            markup:
+  `<tr>
+    <td class="small-text grey"><input type="text" readonly="readonly"
+value="${rare.name}" onclick="select(); document.execCommand('copy');"
+size="30" /></td>
+    <td class="regular-text">${formatCurrency(state.prices[id].buy)}
+</td>
+    <td class="regular-text">${formatCurrency(profit)}</td>
+    <td></td>
+    <td></td>
+  </tr>`,
+            profit,
+            cost: state.prices[id].buy
+          }
+];
+}, []);
+      const totalProfitBuy = resultsBuy.reduce((accumulator, value) =>
+(accumulator + (value.profit * rareBuyOrderVolume)), 0);
+      const totalCostBuy = resultsBuy.reduce((accumulator, value) =>
+(accumulator + value.cost * rareBuyOrderVolume), 0);
+      const raresBuyHeader =
 `<tr>
-  <td class="tiny-text grey"><input type="text" readonly="readonly" value="${rare.name}" onclick="select(); document.execCommand('copy');" size="30" /></td>
-  <td class="small-text pink">${formatCurrency(state.prices[id].buy)}</td>
-  <td class="small-text pink">${formatCurrency(threshold)}</td>
-  <td class="small-text pink">${formatCurrency(profitBuy)}</td>
-</tr>`,
-          markupSell:
+  <th></th>
+  <th class="regular-text">${formatCurrency(totalCostBuy)}</td>
+  <th class="regular-text blue">${formatPercent(totalProfitBuy /
+totalCostBuy)}</td>
+  <th class="regular-text">${formatCurrency(totalProfitBuy)}</td>
+  <th></th>
+</tr>`;
+      const resultsSell = Object.keys(rares).reduce((accumulatorSell,
+id) => {
+        const rare = rares[id];
+        const threshold = Math.round(
+          (
+            targetEctoPrice * 0.875
+            + charmPrice * 0.032
+            + motePrice * 1.6
+            + (rare["19700"] === undefined ? 0 : mithrilOrePrice *
+rare["19700"])
+            + (rare["19701"] === undefined ? 0 : orichalcumOrePrice *
+rare["19701"])
+            + (rare["19729"] === undefined ? 0 : thickLeatherPrice *
+rare["19729"])
+            + (rare["19732"] === undefined ? 0 : hardenedLeatherPrice
+* rare["19732"])
+            + (rare["19745"] === undefined ? 0 : gossamerPrice *
+rare["19745"])
+            + (rare["19748"] === undefined ? 0 : silkPrice *
+rare["19748"])
+          ) * tradingPostNetProfitRatio
+          - salvageCost
+        );
+ 
+         const total = state.prices[id].sellListings.reduce(
+          (accumulator, listing) => {
+            const profit = accumulator.profit + (threshold >
+listing.unit_price ? ((threshold - listing.unit_price) *
+listing.quantity) : 0);
+            const cost = accumulator.cost + (threshold >
+listing.unit_price ? (listing.unit_price * listing.quantity) : 0);
+            return {
+              profit,
+cost }
+}, {
+profit: 0,
+cost: 0 }
+);
+        const partialSellProfit = accumulatorSell.reduce((accumulator,
+value) => (accumulator + value.profit), 0);
+        const partialSellCost = accumulatorSell.reduce((accumulator,
+value) => (accumulator + value.cost), 0);
+        const optimal = state.prices[id].sellListings.reduce(
+          (accumulator, listing) => {
+            const profit = accumulator.profit + (threshold >
+listing.unit_price ? ((threshold - listing.unit_price) *
+listing.quantity) : 0);
+            const cost = accumulator.cost + (threshold >
+listing.unit_price ? (listing.unit_price * listing.quantity) : 0);
+            const ratio = ((profit / total.profit) / (cost /
+total.cost)) * (profit / total.profit);
+            const profitRatio = (partialSellProfit + profit) /
+(partialSellCost + cost);
+            if (
+              profit === 0
+              || profit === accumulator.profit
+              || ratio <= accumulator.ratio
+              || (
+isEfficient
+                && profitRatio < (totalProfitBuy / totalCostBuy)
+              )
+            ) { return accumulator; }
+            return {
+              profit,
+              cost,
+              ratio,
+              maximumPrice: listing.unit_price
+} },
+{
+profit: 0,
+
+            cost: 0,
+            ratio: 0,
+            maximumPrice: 0
+} );
+        if (optimal.profit < minimumSellProfit) { return
+accumulatorSell; }
+        return [
+          ...accumulatorSell,
+{
+id,
+            markup:
+  `<tr>
+    <td class="small-text grey"><input type="text" readonly="readonly"
+value="${rare.name}" onclick="select(); document.execCommand('copy');"
+size="30" /></td>
+    <td class="regular-text">${formatCurrency(state.prices[id].sell)}
+</td>
+    <td class="regular-text">${formatCurrency(optimal.maximumPrice ||
+threshold)}</td>
+    <td class="regular-text">${formatCurrency(optimal.profit)}</td>
+    <td></td>
+ </tr>`,
+];
+}, []);
+      const totalProfitSell = resultsSell.reduce((accumulator, value)
+=> (accumulator + value.profit), 0);
+      const totalCostSell = resultsSell.reduce((accumulator, value) =>
+(accumulator + value.cost), 0);
+      const raresSellHeader =
 `<tr>
-  <td class="tiny-text grey"><input type="text" readonly="readonly" value="${rare.name}" onclick="select(); document.execCommand('copy');" size="30" /></td>
-  <td class="small-text blue">${formatCurrency(state.prices[id].sell)}</td>
-  <td class="small-text blue">${formatCurrency(threshold)}</td>
-  <td class="small-text blue">${formatCurrency(profitSell)}</td>
-</tr>`,
-          profitBuy,
-          profitSell
-        };
-      });
-
-      results.sort((a, b) => b.profitBuy - a.profitBuy);
-      document.getElementById("rares-buy").innerHTML = results.map((result) => (state.prices[result.id].supply > 200 && result.profitBuy > 120) ? result.markupBuy : "").join("");
-
-      results.sort((a, b) => b.profitSell - a.profitSell);
-      document.getElementById("rares-sell").innerHTML = results.map((result) => result.profitSell > 20 ? result.markupSell : "").join("");
-
-      document.getElementById("rares-sum").innerHTML = formatCurrency(results.reduce((a, b) => (b.profitSell > 20 ? (a + b.profitSell) : a), 0));
-      document.getElementById("rares-sum").style.color = document.getElementById("rares-sell").innerHTML === "" ? "#aaaaaa" : "#62a4da";
+  <th></th>
+  <th class="regular-text blue">${formatCurrency(totalCostSell)}</td>
+  <th class="regular-text blue">${formatPercent(totalProfitSell /
+totalCostSell)}</td>
+  <th class="regular-text blue">${formatCurrency(totalProfitSell)}
+</td>
+  <th></th>
+</tr>`;
+      resultsBuy.sort((a, b) => b.profit - a.profit);
+      document.getElementById("rares-buy").innerHTML = raresBuyHeader
++ resultsBuy.map((result) => result.markup).join("");
+      resultsSell.sort((a, b) => b.profit - a.profit);
+      document.getElementById("rares-sell").innerHTML =
+raresSellHeader + resultsSell.map((result) => result.markup).join("");
     };
-
     const fetchPrices = () => {
-      [
-        ...items,
-        ...Object.keys(rares)
-      ].forEach((value) => {
-        fetch(`https://api.guildwars2.com/v2/commerce/listings/${value}`, init)
+profit: optimal.profit,
+  cost: optimal.cost
+}
+
+      items.forEach((value) => {
+fetch(`https://api.guildwars2.com/v2/commerce/prices/${value}`, init)
+        .then((response) => response.json())
+        .then((data) => {
+          state.prices[value] = {
+            buy: data.buys.unit_price,
+            sell: data.sells.unit_price,
+            supply: 0,
+            sellListings: []
+}
+          render();
+        });
+});
+      items.slice(0, 4).forEach((value) => {
+fetch(`http://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`
+, init)
+        .then((response) => response.json())
+        .then((data) => {
+ => {
+const pastListings = [ ...data.results ];
+const peakPrice = pastListings.reduce((accumulator, listing)
+            return listing.unit_price > accumulator ?
+listing.unit_price : accumulator;
+}, 0);
+          state.peakPrices[value] = {
+            sell: peakPrice,
+            sellListings: data.results
+          };
+          render();
+        });
+});
+      Object.keys(rares).forEach((value) => {
+fetch(`https://api.guildwars2.com/v2/commerce/listings/${value}`,
+init)
         .then((response) => response.json())
         .then((data) => {
           state.prices[value] = {
@@ -631,25 +573,43 @@
             sell: data.sells[0].unit_price,
             supply: data.sells.reduce((a, b) => (a + b.quantity), 0),
             sellListings: data.sells
-          }
-
+}
           render();
         });
-      });
-    };
-
+}); };
     const render = () => {
-      if (Object.keys(state.prices).length !== (items.length + Object.keys(rares).length)) { return; }
 
-      document.getElementById("target-ecto-price").value = parseInt(document.getElementById("target-ecto-price").value) || state.prices["19721"].sell;
-
-      renderEctoProfit();
+      if (
+        Object.keys(state.prices).length !== (items.length +
+Object.keys(rares).length)
+        || Object.keys(state.peakPrices).length !== 4
+){
+return; }
+      renderEcto();
       renderRares();
     };
-
+    document.getElementById("target-ecto-price").onwheel = (event) =>
+ {
+event.preventDefault();
+        event.deltaY < 0 ? document.getElementById("target-ecto-
+price").stepUp() : document.getElementById("target-ecto-
+price").stepDown();
+        document.getElementById("target-ecto-price").onchange();
+    };
+    document.getElementById("peak-ecto-price").onclick = () => {
+      if ( ! state.peakPrices["19721"].sell) { return; }
+      document.getElementById("target-ecto-price").value =
+state.peakPrices["19721"].sell;
+render(); }
+    document.getElementById("ecto-price").onclick = () => {
+      if ( ! state.prices["19721"].sell) { return; }
+      document.getElementById("target-ecto-price").value =
+state.prices["19721"].sell;
+render(); }
     document.getElementById("target-ecto-price").onchange = render;
+    document.getElementById("efficient").onchange = render;
+    document.getElementById("refresh").onclick = fetchPrices;
     fetchPrices();
-    //setInterval(fetchPrices, 30000);
   })();
   </script>
 </body>
