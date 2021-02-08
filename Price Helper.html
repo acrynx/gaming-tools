@@ -566,7 +566,7 @@
       });
 
       items.slice(0, 4).forEach((value) => {
-        fetch(`http://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`, init)
+        fetch(`https://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`, init)
         .then((response) => response.json())
         .then((data) => {
           const pastListings = [ ...data.results ];
