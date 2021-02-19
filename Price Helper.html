@@ -102,25 +102,25 @@
   <table>
     <tr>
       <td><a href="https://www.gw2bltc.com/item/89103" target="_blank"><img id="charm" src="https://render.guildwars2.com/file/E4B016CDF70960156803FD04C425BF9A4C382D95/2063466.png" /></a></td>
-      <td id="peak-charm-price" class="regular-text c-pointer"></td>
+      <td id="median-charm-price" class="regular-text c-pointer"></td>
       <td><a href="https://www.gw2bltc.com/item/19721" target="_blank"><img id="ecto" src="https://render.guildwars2.com/file/18CE5D78317265000CF3C23ED76AB3CEE86BA60E/65941.png" /></a></td>
-      <td id="peak-ecto-price" class="regular-text c-pointer"></td>
+      <td id="median-ecto-price" class="regular-text c-pointer"></td>
       <td><a href="https://www.gw2bltc.com/item/19732" target="_blank"><img id="hardened-leather" src="https://render.guildwars2.com/file/C4600FB8F97F2618F4DFA2CE9FD2C669FAE9DE6F/65949.png" /></a></td>
-      <td id="peak-hardened-leather-price" class="regular-text"></td>
+      <td id="median-hardened-leather-price" class="regular-text"></td>
       <td><a href="https://www.gw2bltc.com/item/19701" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/A6E2C82153BA684E2D05D3FCA09F3E02431366ED/220461.png" /></a></td>
-      <td id="peak-orichalcum-ore-price" class="regular-text"></td>
+      <td id="median-orichalcum-ore-price" class="regular-text"></td>
       <td><input id="efficient" class="checkbox" type="checkbox" value="1" checked="checked" /></td>
       <td><img id="refresh" src="https://render.guildwars2.com/file/C6A3FFF06BB4D50050D3B1FE75E3AACBFA0F8009/63129.png" class="c-pointer" /></td>
     </tr>
     <tr>
       <td><a href="https://www.gw2bltc.com/item/19745" target="_blank"><img id="charm" src="https://render.guildwars2.com/file/0CB2040408D0789690575FFE3532F3C34B693C6F/340417.png" /></a></td>
-      <td id="peak-gossamer-price" class="regular-text c-pointer"></td>
+      <td id="median-gossamer-price" class="regular-text c-pointer"></td>
       <td><a href="https://www.gw2bltc.com/item/19729" target="_blank"><img id="thick-leather" src="https://render.guildwars2.com/file/CC3A2CAADBB2F2B13B1E70079E7E207B08D16E93/65946.png" /></a></td>
-      <td id="peak-thick-leather-price" class="regular-text"></td>
+      <td id="median-thick-leather-price" class="regular-text"></td>
       <td><a href="https://www.gw2bltc.com/item/19700" target="_blank"><img id="ecto" src="https://render.guildwars2.com/file/E90FE803CDC205CDEB13FE03694D4D04757ACF5D/65928.png" /></a></td>
-      <td id="peak-mithril-ore-price" class="regular-text c-pointer"></td>
+      <td id="median-mithril-ore-price" class="regular-text c-pointer"></td>
       <td><a href="https://www.gw2bltc.com/item/19748" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/021DA825F2092327B1C6BC09EC77BD5DE5B4770D/65961.png" /></a></td>
-      <td id="peak-silk-price" class="regular-text"></td>
+      <td id="median-silk-price" class="regular-text"></td>
       <td></td>
       <td></td>
     </tr>
@@ -134,7 +134,7 @@
 
     const state = {
       prices: {},
-      peakPrices: {}
+      medianPrices: {}
     };
 
     const motePrice = 8;
@@ -349,34 +349,34 @@
     };
 
     const renderEcto = () => {
-      const peakEctoPrice = state.peakPrices["19721"].sell;
-      const peakCharmPrice = state.peakPrices["89103"].sell;
-      const peakHardenedLeatherPrice = state.peakPrices["19732"].sell;
-      const peakThickLeatherPrice = state.peakPrices["19729"].sell;
-      const peakSilkPrice = state.peakPrices["19748"].sell;
-      const peakGossamerPrice = state.peakPrices["19745"].sell;
-      const peakMithrilOrePrice = state.peakPrices["19700"].sell;
-      const peakOrichalcumOrePrice = state.peakPrices["19701"].sell;
+      const medianEctoPrice = state.medianPrices["19721"].sell;
+      const medianCharmPrice = state.medianPrices["89103"].sell;
+      const medianHardenedLeatherPrice = state.medianPrices["19732"].sell;
+      const medianThickLeatherPrice = state.medianPrices["19729"].sell;
+      const medianSilkPrice = state.medianPrices["19748"].sell;
+      const medianGossamerPrice = state.medianPrices["19745"].sell;
+      const medianMithrilOrePrice = state.medianPrices["19700"].sell;
+      const medianOrichalcumOrePrice = state.medianPrices["19701"].sell;
 
-      document.getElementById("peak-ecto-price").innerHTML = formatCurrency(peakEctoPrice);
-      document.getElementById("peak-charm-price").innerHTML = formatCurrency(peakCharmPrice);
-      document.getElementById("peak-hardened-leather-price").innerHTML = formatCurrency(peakHardenedLeatherPrice);
-      document.getElementById("peak-thick-leather-price").innerHTML = formatCurrency(peakThickLeatherPrice);
-      document.getElementById("peak-silk-price").innerHTML = formatCurrency(peakSilkPrice);
-      document.getElementById("peak-gossamer-price").innerHTML = formatCurrency(peakGossamerPrice);
-      document.getElementById("peak-mithril-ore-price").innerHTML = formatCurrency(peakMithrilOrePrice);
-      document.getElementById("peak-orichalcum-ore-price").innerHTML = formatCurrency(peakOrichalcumOrePrice);
+      document.getElementById("median-ecto-price").innerHTML = formatCurrency(medianEctoPrice);
+      document.getElementById("median-charm-price").innerHTML = formatCurrency(medianCharmPrice);
+      document.getElementById("median-hardened-leather-price").innerHTML = formatCurrency(medianHardenedLeatherPrice);
+      document.getElementById("median-thick-leather-price").innerHTML = formatCurrency(medianThickLeatherPrice);
+      document.getElementById("median-silk-price").innerHTML = formatCurrency(medianSilkPrice);
+      document.getElementById("median-gossamer-price").innerHTML = formatCurrency(medianGossamerPrice);
+      document.getElementById("median-mithril-ore-price").innerHTML = formatCurrency(medianMithrilOrePrice);
+      document.getElementById("median-orichalcum-ore-price").innerHTML = formatCurrency(medianOrichalcumOrePrice);
     };
 
     const renderRares = () => {
-      const peakEctoPrice = state.peakPrices["19721"].sell;
-      const peakCharmPrice = state.peakPrices["89103"].sell;
-      const peakHardenedLeatherPrice = state.peakPrices["19732"].sell;
-      const peakThickLeatherPrice = state.peakPrices["19729"].sell;
-      const peakSilkPrice = state.peakPrices["19748"].sell;
-      const peakGossamerPrice = state.peakPrices["19745"].sell;
-      const peakMithrilOrePrice = state.peakPrices["19700"].sell;
-      const peakOrichalcumOrePrice = state.peakPrices["19701"].sell;
+      const medianEctoPrice = state.medianPrices["19721"].sell;
+      const medianCharmPrice = state.medianPrices["89103"].sell;
+      const medianHardenedLeatherPrice = state.medianPrices["19732"].sell;
+      const medianThickLeatherPrice = state.medianPrices["19729"].sell;
+      const medianSilkPrice = state.medianPrices["19748"].sell;
+      const medianGossamerPrice = state.medianPrices["19745"].sell;
+      const medianMithrilOrePrice = state.medianPrices["19700"].sell;
+      const medianOrichalcumOrePrice = state.medianPrices["19701"].sell;
 
       const isEfficient = document.getElementById("efficient").checked;
 
@@ -384,15 +384,15 @@
         const rare = rares[id];
         const threshold = Math.round(
           (
-            peakEctoPrice * 0.875
-            + peakCharmPrice * 0.032
+            medianEctoPrice * 0.875
+            + medianCharmPrice * 0.032
             + motePrice * 1.6
-            + (rare["19700"] === undefined ? 0 : peakMithrilOrePrice * rare["19700"])
-            + (rare["19701"] === undefined ? 0 : peakOrichalcumOrePrice * rare["19701"])
-            + (rare["19729"] === undefined ? 0 : peakThickLeatherPrice * rare["19729"])
-            + (rare["19732"] === undefined ? 0 : peakHardenedLeatherPrice * rare["19732"])
-            + (rare["19745"] === undefined ? 0 : peakGossamerPrice * rare["19745"])
-            + (rare["19748"] === undefined ? 0 : peakSilkPrice * rare["19748"])
+            + (rare["19700"] === undefined ? 0 : medianMithrilOrePrice * rare["19700"])
+            + (rare["19701"] === undefined ? 0 : medianOrichalcumOrePrice * rare["19701"])
+            + (rare["19729"] === undefined ? 0 : medianThickLeatherPrice * rare["19729"])
+            + (rare["19732"] === undefined ? 0 : medianHardenedLeatherPrice * rare["19732"])
+            + (rare["19745"] === undefined ? 0 : medianGossamerPrice * rare["19745"])
+            + (rare["19748"] === undefined ? 0 : medianSilkPrice * rare["19748"])
           ) * tradingPostNetProfitRatio
           - salvageCost
         );
@@ -435,15 +435,15 @@
         const rare = rares[id];
         const threshold = Math.round(
           (
-            peakEctoPrice * 0.875
-            + peakCharmPrice * 0.032
+            medianEctoPrice * 0.875
+            + medianCharmPrice * 0.032
             + motePrice * 1.6
-            + (rare["19700"] === undefined ? 0 : peakMithrilOrePrice * rare["19700"])
-            + (rare["19701"] === undefined ? 0 : peakOrichalcumOrePrice * rare["19701"])
-            + (rare["19729"] === undefined ? 0 : peakThickLeatherPrice * rare["19729"])
-            + (rare["19732"] === undefined ? 0 : peakHardenedLeatherPrice * rare["19732"])
-            + (rare["19745"] === undefined ? 0 : peakGossamerPrice * rare["19745"])
-            + (rare["19748"] === undefined ? 0 : peakSilkPrice * rare["19748"])
+            + (rare["19700"] === undefined ? 0 : medianMithrilOrePrice * rare["19700"])
+            + (rare["19701"] === undefined ? 0 : medianOrichalcumOrePrice * rare["19701"])
+            + (rare["19729"] === undefined ? 0 : medianThickLeatherPrice * rare["19729"])
+            + (rare["19732"] === undefined ? 0 : medianHardenedLeatherPrice * rare["19732"])
+            + (rare["19745"] === undefined ? 0 : medianGossamerPrice * rare["19745"])
+            + (rare["19748"] === undefined ? 0 : medianSilkPrice * rare["19748"])
           ) * tradingPostNetProfitRatio
           - salvageCost
         );
@@ -559,13 +559,16 @@
         fetch(`https://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`, init)
         .then((response) => response.json())
         .then((data) => {
-          const pastListings = data.results.slice(0, 24);
-          const peakPrice = pastListings.reduce((accumulator, listing) => {
-            return listing.unit_price > accumulator ? listing.unit_price : accumulator;
-          }, 0);
+          const pastListings = data.results.slice(0, 25);
+          const pastPrices = pastListings.map(function (listing) {
+            return listing.unit_price;
+          });
+          const medianPrice = pastPrices.sort(function(a, b) {
+            return a - b;
+          })[12];
 
-          state.peakPrices[value] = {
-            sell: peakPrice,
+          state.medianPrices[value] = {
+            sell: medianPrice,
             sellListings: data.results
           };
 
@@ -592,7 +595,7 @@
     const render = () => {
       if (
         Object.keys(state.prices).length !== (items.length + Object.keys(rares).length)
-        || Object.keys(state.peakPrices).length !== items.length
+        || Object.keys(state.medianPrices).length !== items.length
       ) {
         return;
       }
