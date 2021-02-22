@@ -541,21 +541,6 @@
 
     const fetchPrices = () => {
       items.forEach((value) => {
-        fetch(`https://api.guildwars2.com/v2/commerce/prices/${value}`, init)
-        .then((response) => response.json())
-        .then((data) => {
-          state.prices[value] = {
-            buy: data.buys.unit_price,
-            sell: data.sells.unit_price,
-            supply: 0,
-            sellListings: []
-          }
-
-          render();
-        });
-      });
-
-      items.forEach((value) => {
         fetch(`https://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`, init)
         .then((response) => response.json())
         .then((data) => {
@@ -568,9 +553,27 @@
           })[12];
 
           state.medianPrices[value] = {
-            sell: medianPrice,
+            sell: medianPrice - 1,
             sellListings: data.results
           };
+
+          render();
+        });
+      });
+
+      items.forEach((value) => {
+        fetch(`https://api.guildwars2.com/v2/commerce/listings/${value}`, init)
+        .then((response) => response.json())
+        .then((data) => {
+          const normalizedBuyPrice = data.buys[data.buys.length - 5].unit_price + 5;
+          const normalizedSellPrice = data.sells[4].unit_price - 5;
+
+          state.prices[value] = {
+            buy: normalizedBuyPrice,
+            sell: normalizedSellPrice,
+            supply: data.sells.reduce((a, b) => (a + b.quantity), 0),
+            sellListings: data.sells
+          }
 
           render();
         });
@@ -581,7 +584,7 @@
         .then((response) => response.json())
         .then((data) => {
           state.prices[value] = {
-            buy: data.buys[0].unit_price,
+            buy: data.buys[0].unit_price + 1,
             sell: data.sells[0].unit_price,
             supply: data.sells.reduce((a, b) => (a + b.quantity), 0),
             sellListings: data.sells
