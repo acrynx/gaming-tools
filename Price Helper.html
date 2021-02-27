@@ -129,6 +129,9 @@
   <table class="rares" id="rares-sell"></table>
   <table class="rares" id="rares-buy"></table>
 
+  <table class="rares" id="chests-buy"></table>
+  <table class="rares" id="chests-sell"></table>
+
   <script type="text/javascript">
   (() => {
 
@@ -146,6 +149,10 @@
     const minimumBuyProfit = 10;
     const minimumSellProfit = 1000;
 
+    const spoolThreshold = 3400;
+    const spoolSellOrderVolume = 500;
+    const runCostPerSpool = 3333;
+
     const init = {cache: "no-store"};
     const items = [
       "19721", // ecto
@@ -155,7 +162,8 @@
       "19748", // silk
       "19745", // gossamer
       "19700", // mithrilOre
-      "19701" // orichalcumOre
+      "19701", // orichalcumOre
+      "83322" // spoolOfDeldrimorThread
     ];
 
     const rares = {
@@ -539,6 +547,50 @@
       document.getElementById("rares-sell").innerHTML = raresSellHeader + resultsSell.map((result) => result.markup).join("");
     };
 
+    const renderChests = () => {
+      const spoolOfDeldrimorThreadSellPrice = state.prices["83322"].sell;
+      const profitSell = (spoolOfDeldrimorThreadSellPrice - spoolThreshold) * tradingPostNetProfitRatio;
+      const totalProfitSell = profitSell * spoolSellOrderVolume;
+      const totalCostSell = spoolSellOrderVolume * runCostPerSpool;
+
+      const chestsSellHeader =
+`<tr>
+  <th></th>
+  <th class="regular-text">${formatCurrency(totalCostSell)}</td>
+  <th class="regular-text blue">${formatPercent(totalProfitSell / totalCostSell)}</td>
+  <th class="regular-text">${formatCurrency(totalProfitSell)}</td>
+  <th></th>
+</tr>`;
+
+      const totalBuy = state.prices["83322"].buyListings.reduce(
+        (accumulator, listing) => {
+          const profit = accumulator.profit + (listing.unit_price > spoolThreshold ? (((listing.unit_price - spoolThreshold) * tradingPostNetProfitRatio) * listing.quantity) : 0);
+          const cost = accumulator.cost + (listing.unit_price > spoolThreshold ? (listing.quantity * runCostPerSpool) : 0);
+
+          return {
+            profit,
+            cost
+          }
+        },
+        {
+          profit: 0,
+          cost: 0
+        }
+      );
+
+      const chestsBuyHeader =
+`<tr>
+  <th></th>
+  <th class="regular-text blue">${formatCurrency(totalBuy.cost)}</td>
+  <th class="regular-text blue">${formatPercent(totalBuy.profit / totalBuy.cost)}</td>
+  <th class="regular-text blue">${formatCurrency(totalBuy.profit)}</td>
+  <th></th>
+</tr>`;
+      
+      document.getElementById("chests-sell").innerHTML = chestsSellHeader;
+      document.getElementById("chests-buy").innerHTML = chestsBuyHeader;
+    };
+
     const fetchPrices = () => {
       items.forEach((value) => {
         fetch(`https://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`, init)
@@ -572,6 +624,7 @@
             buy: normalizedBuyPrice,
             sell: normalizedSellPrice,
             supply: data.sells.reduce((a, b) => (a + b.quantity), 0),
+            buyListings: data.buys,
             sellListings: data.sells
           }
 
@@ -605,6 +658,7 @@
 
       renderEcto();
       renderRares();
+      renderChests();
     };
     
     document.getElementById("efficient").onchange = render;
