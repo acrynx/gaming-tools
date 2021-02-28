@@ -109,8 +109,8 @@
       <td id="hardened-leather-price" class="regular-text"></td>
       <td><a href="https://www.gw2bltc.com/item/19701" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/A6E2C82153BA684E2D05D3FCA09F3E02431366ED/220461.png" /></a></td>
       <td id="orichalcum-ore-price" class="regular-text"></td>
-      <td><input id="efficient" class="checkbox" type="checkbox" value="1" checked="checked" /></td>
       <td><img id="refresh" src="https://render.guildwars2.com/file/C6A3FFF06BB4D50050D3B1FE75E3AACBFA0F8009/63129.png" class="c-pointer" /></td>
+      <td><input id="efficient" class="checkbox" type="checkbox" value="1" checked="checked" /></td>
     </tr>
     <tr>
       <td><a href="https://www.gw2bltc.com/item/19745" target="_blank"><img id="charm" src="https://render.guildwars2.com/file/0CB2040408D0789690575FFE3532F3C34B693C6F/340417.png" /></a></td>
@@ -121,8 +121,8 @@
       <td id="mithril-ore-price" class="regular-text c-pointer"></td>
       <td><a href="https://www.gw2bltc.com/item/19748" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/021DA825F2092327B1C6BC09EC77BD5DE5B4770D/65961.png" /></a></td>
       <td id="silk-price" class="regular-text"></td>
-      <td></td>
-      <td></td>
+      <td><a href="https://www.gw2bltc.com/item/83322" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/16B233FDC5A4B1C4D631CF022B5C6348045F0DDE/1765976.png" /></a></td>
+      <td id="spool-price" class="regular-text"></td>
     </tr>
   </table>
 
@@ -141,6 +141,9 @@
     };
 
     const motePrice = 8;
+    const millingStonePrice = 9;
+    const forgemetalPrice = 32;
+    const tradeContractProfit = 28;
     const salvageCost = 60;
     const tradingPostNetProfitRatio = 0.85;
 
@@ -163,7 +166,15 @@
       "19745", // gossamer
       "19700", // mithrilOre
       "19701", // orichalcumOre
-      "83322" // spoolOfDeldrimorThread
+      "83322", // spoolOfDeldrimorThread
+      "82611", // elonianCutlass
+      "85016", // pocug
+      "84731", // poug
+      "83008", // porug
+      "84688", // rotdct
+      "83261", // rotdlt
+      "83306", // rotdat
+      "76491" // blackDiamond
     ];
 
     const rares = {
@@ -365,6 +376,7 @@
       const gossamerPrice = Math.max(state.prices["19745"].sell, state.medianPrices["19745"].sell);
       const mithrilOrePrice = Math.max(state.prices["19700"].sell, state.medianPrices["19700"].sell);
       const orichalcumOrePrice = Math.max(state.prices["19701"].sell, state.medianPrices["19701"].sell);
+      const spoolPrice = Math.max(state.prices["83322"].sell, state.medianPrices["83322"].sell);
 
       document.getElementById("ecto-price").innerHTML = formatCurrency(ectoPrice);
       document.getElementById("charm-price").innerHTML = formatCurrency(charmPrice);
@@ -374,6 +386,7 @@
       document.getElementById("gossamer-price").innerHTML = formatCurrency(gossamerPrice);
       document.getElementById("mithril-ore-price").innerHTML = formatCurrency(mithrilOrePrice);
       document.getElementById("orichalcum-ore-price").innerHTML = formatCurrency(orichalcumOrePrice);
+      document.getElementById("spool-price").innerHTML = formatCurrency(spoolPrice);
     };
 
     const renderRares = () => {
@@ -548,8 +561,34 @@
     };
 
     const renderChests = () => {
-      const spoolOfDeldrimorThreadSellPrice = state.prices["83322"].sell;
-      const profitSell = (spoolOfDeldrimorThreadSellPrice - spoolThreshold) * tradingPostNetProfitRatio;
+      const spoolPrice = Math.max(state.prices["83322"].sell, state.medianPrices["83322"].sell);
+      const elonianCutlassPrice = state.prices["82611"].buy;
+      const pocugPrice = Math.max(state.prices["85016"].sell, state.medianPrices["85016"].sell);
+      const pougPrice = Math.max(state.prices["84731"].sell, state.medianPrices["84731"].sell);
+      const porugPrice = Math.max(state.prices["83008"].sell, state.medianPrices["83008"].sell);
+      const rotdctPrice = state.prices["84688"].buy;
+      const rotdltPrice = state.prices["83261"].buy;
+      const rotdatPrice = state.prices["83306"].buy;
+      const blackDiamondPrice = Math.max(state.prices["76491"].sell, state.medianPrices["76491"].sell);
+
+      const profitSell = Math.round(
+        (
+          spoolPrice * 3
+          + elonianCutlassPrice * 0.05625
+          + pocugPrice * 1.1225
+          + pougPrice * 0.49875
+          + porugPrice * 0.06375
+          + rotdctPrice * 0.04875
+          + rotdltPrice * 0.04875
+          + rotdatPrice * 0.04875
+          + blackDiamondPrice * 0.01
+        ) * tradingPostNetProfitRatio
+        + millingStonePrice * 1.315
+        + forgemetalPrice * 0.90625
+        + tradeContractProfit * 4.75
+        - 10000
+      );
+
       const totalProfitSell = profitSell * spoolSellOrderVolume;
       const totalCostSell = spoolSellOrderVolume * runCostPerSpool;
 
@@ -564,8 +603,27 @@
 
       const totalBuy = state.prices["83322"].buyListings.reduce(
         (accumulator, listing) => {
-          const profit = accumulator.profit + (listing.unit_price > spoolThreshold ? (((listing.unit_price - spoolThreshold) * tradingPostNetProfitRatio) * listing.quantity) : 0);
-          const cost = accumulator.cost + (listing.unit_price > spoolThreshold ? (listing.quantity * runCostPerSpool) : 0);
+
+          const profitBuy = Math.round(
+            (
+              listing.unit_price * 3
+              + elonianCutlassPrice * 0.05625
+              + pocugPrice * 1.1225
+              + pougPrice * 0.49875
+              + porugPrice * 0.06375
+              + rotdctPrice * 0.04875
+              + rotdltPrice * 0.04875
+              + rotdatPrice * 0.04875
+              + blackDiamondPrice * 0.01
+            ) * tradingPostNetProfitRatio
+            + millingStonePrice * 1.315
+            + forgemetalPrice * 0.90625
+            + tradeContractProfit * 4.75
+            - 10000
+          );
+
+          const profit = accumulator.profit + (profitBuy > 0 ? (profitBuy / 3 * listing.quantity) : 0);
+          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * runCostPerSpool) : 0);
 
           return {
             profit,
