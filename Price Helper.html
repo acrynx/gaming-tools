@@ -152,9 +152,8 @@
     const minimumBuyProfit = 10;
     const minimumSellProfit = 1000;
 
-    const spoolThreshold = 3400;
-    const spoolSellOrderVolume = 500;
-    const runCostPerSpool = 3333;
+    const chestsRunCost = 10000;
+    const spoolSellOrderVolume = 300;
 
     const init = {cache: "no-store"};
     const items = [
@@ -369,14 +368,14 @@
 
     const renderEcto = () => {
       const ectoPrice = Math.max(state.prices["19721"].sell, state.medianPrices["19721"].sell);
-      const charmPrice = Math.max(state.prices["89103"].sell, state.medianPrices["89103"].sell);
-      const hardenedLeatherPrice = Math.max(state.prices["19732"].sell, state.medianPrices["19732"].sell);
-      const thickLeatherPrice = Math.max(state.prices["19729"].sell, state.medianPrices["19729"].sell);
-      const silkPrice = Math.max(state.prices["19748"].sell, state.medianPrices["19748"].sell);
-      const gossamerPrice = Math.max(state.prices["19745"].sell, state.medianPrices["19745"].sell);
-      const mithrilOrePrice = Math.max(state.prices["19700"].sell, state.medianPrices["19700"].sell);
-      const orichalcumOrePrice = Math.max(state.prices["19701"].sell, state.medianPrices["19701"].sell);
-      const spoolPrice = Math.max(state.prices["83322"].sell, state.medianPrices["83322"].sell);
+      const charmPrice = state.prices["89103"].sell;
+      const hardenedLeatherPrice = state.prices["19732"].sell;
+      const thickLeatherPrice = state.prices["19729"].sell;
+      const silkPrice = state.prices["19748"].sell;
+      const gossamerPrice = state.prices["19745"].sell;
+      const mithrilOrePrice = state.prices["19700"].sell;
+      const orichalcumOrePrice = state.prices["19701"].sell;
+      const spoolPrice = state.prices["83322"].sell;
 
       document.getElementById("ecto-price").innerHTML = formatCurrency(ectoPrice);
       document.getElementById("charm-price").innerHTML = formatCurrency(charmPrice);
@@ -391,13 +390,13 @@
 
     const renderRares = () => {
       const ectoPrice = Math.max(state.prices["19721"].sell, state.medianPrices["19721"].sell);
-      const charmPrice = Math.max(state.prices["89103"].sell, state.medianPrices["89103"].sell);
-      const hardenedLeatherPrice = Math.max(state.prices["19732"].sell, state.medianPrices["19732"].sell);
-      const thickLeatherPrice = Math.max(state.prices["19729"].sell, state.medianPrices["19729"].sell);
-      const silkPrice = Math.max(state.prices["19748"].sell, state.medianPrices["19748"].sell);
-      const gossamerPrice = Math.max(state.prices["19745"].sell, state.medianPrices["19745"].sell);
-      const mithrilOrePrice = Math.max(state.prices["19700"].sell, state.medianPrices["19700"].sell);
-      const orichalcumOrePrice = Math.max(state.prices["19701"].sell, state.medianPrices["19701"].sell);
+      const charmPrice = state.prices["89103"].sell;
+      const hardenedLeatherPrice = state.prices["19732"].sell;
+      const thickLeatherPrice = state.prices["19729"].sell;
+      const silkPrice = state.prices["19748"].sell;
+      const gossamerPrice = state.prices["19745"].sell;
+      const mithrilOrePrice = state.prices["19700"].sell;
+      const orichalcumOrePrice = state.prices["19701"].sell;
 
       const isEfficient = document.getElementById("efficient").checked;
 
@@ -561,45 +560,15 @@
     };
 
     const renderChests = () => {
-      const spoolPrice = Math.max(state.prices["83322"].sell, state.medianPrices["83322"].sell);
+      const spoolPrice = state.prices["83322"].sell;
       const elonianCutlassPrice = state.prices["82611"].buy;
-      const pocugPrice = Math.max(state.prices["85016"].sell, state.medianPrices["85016"].sell);
-      const pougPrice = Math.max(state.prices["84731"].sell, state.medianPrices["84731"].sell);
-      const porugPrice = Math.max(state.prices["83008"].sell, state.medianPrices["83008"].sell);
+      const pocugPrice = state.prices["85016"].sell;
+      const pougPrice = state.prices["84731"].sell;
+      const porugPrice = state.prices["83008"].sell;
       const rotdctPrice = state.prices["84688"].buy;
       const rotdltPrice = state.prices["83261"].buy;
       const rotdatPrice = state.prices["83306"].buy;
-      const blackDiamondPrice = Math.max(state.prices["76491"].sell, state.medianPrices["76491"].sell);
-
-      const profitSell = Math.round(
-        (
-          spoolPrice * 3
-          + elonianCutlassPrice * 0.05625
-          + pocugPrice * 1.1225
-          + pougPrice * 0.49875
-          + porugPrice * 0.06375
-          + rotdctPrice * 0.04875
-          + rotdltPrice * 0.04875
-          + rotdatPrice * 0.04875
-          + blackDiamondPrice * 0.01
-        ) * tradingPostNetProfitRatio
-        + millingStonePrice * 1.315
-        + forgemetalPrice * 0.90625
-        + tradeContractProfit * 4.75
-        - 10000
-      );
-
-      const totalProfitSell = profitSell * spoolSellOrderVolume;
-      const totalCostSell = spoolSellOrderVolume * runCostPerSpool;
-
-      const chestsSellHeader =
-`<tr>
-  <th></th>
-  <th class="regular-text">${formatCurrency(totalCostSell)}</td>
-  <th class="regular-text blue">${formatPercent(totalProfitSell / totalCostSell)}</td>
-  <th class="regular-text">${formatCurrency(totalProfitSell)}</td>
-  <th></th>
-</tr>`;
+      const blackDiamondPrice = state.prices["76491"].sell;
 
       const totalBuy = state.prices["83322"].buyListings.reduce(
         (accumulator, listing) => {
@@ -619,20 +588,33 @@
             + millingStonePrice * 1.315
             + forgemetalPrice * 0.90625
             + tradeContractProfit * 4.75
-            - 10000
+            - chestsRunCost
           );
 
           const profit = accumulator.profit + (profitBuy > 0 ? (profitBuy / 3 * listing.quantity) : 0);
-          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * runCostPerSpool) : 0);
+          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * chestsRunCost / 3) : 0);
+
+          const markup = accumulator.markup + (profitBuy > 0 ? 
+`<tr>
+  <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
+  <td class="regular-text">${formatCurrency(listing.unit_price)}</td>
+  <td class="regular-text">${formatCurrency(profitBuy / 3)}</td>
+  <td class="regular-text">${formatCurrency(profitBuy / 3 * listing.quantity)}</td>
+  <td></td>
+  <td></td>
+</tr>`
+           : "");
 
           return {
             profit,
-            cost
+            cost,
+            markup
           }
         },
         {
           profit: 0,
-          cost: 0
+          cost: 0,
+          markup: ""
         }
       );
 
@@ -644,9 +626,48 @@
   <th class="regular-text blue">${formatCurrency(totalBuy.profit)}</td>
   <th></th>
 </tr>`;
+
+      const profitSell = Math.round(
+        (
+          spoolPrice * 3
+          + elonianCutlassPrice * 0.05625
+          + pocugPrice * 1.1225
+          + pougPrice * 0.49875
+          + porugPrice * 0.06375
+          + rotdctPrice * 0.04875
+          + rotdltPrice * 0.04875
+          + rotdatPrice * 0.04875
+          + blackDiamondPrice * 0.01
+        ) * tradingPostNetProfitRatio
+        + millingStonePrice * 1.315
+        + forgemetalPrice * 0.90625
+        + tradeContractProfit * 4.75
+        - chestsRunCost
+      );
+
+      const totalProfitSell = profitSell / 3 * spoolSellOrderVolume;
+      const totalCostSell = spoolSellOrderVolume * chestsRunCost / 3;
+
+      const chestsSellRowMarkup =
+`<tr>
+  <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
+  <td class="regular-text">${formatCurrency(spoolPrice)}</td>
+  <td class="regular-text">${formatCurrency(profitSell / 3)}</td>
+  <td></td>
+  <td></td>
+</tr>`;
+
+      const chestsSellHeader =
+`<tr>
+  <th></th>
+  <th class="regular-text">${formatCurrency(totalCostSell)}</td>
+  <th class="regular-text blue">${formatPercent(totalProfitSell / totalCostSell)}</td>
+  <th class="regular-text">${formatCurrency(totalProfitSell)}</td>
+  <th></th>
+</tr>`;
       
-      document.getElementById("chests-sell").innerHTML = chestsSellHeader;
-      document.getElementById("chests-buy").innerHTML = chestsBuyHeader;
+      document.getElementById("chests-buy").innerHTML = chestsBuyHeader + totalBuy.markup;
+      document.getElementById("chests-sell").innerHTML = chestsSellHeader + chestsSellRowMarkup;
     };
 
     const fetchPrices = () => {
@@ -675,12 +696,33 @@
         fetch(`https://api.guildwars2.com/v2/commerce/listings/${value}`, init)
         .then((response) => response.json())
         .then((data) => {
-          const normalizedBuyPrice = data.buys[data.buys.length - 5].unit_price + 5;
-          const normalizedSellPrice = data.sells[4].unit_price - 5;
+
+          const normalize = (accumulator, listing, index, listings) => {
+            const previousListing = listings[index - 1];
+            if ( ! previousListing) {
+              return accumulator;
+            }
+
+            const difference = Math.abs(listing.unit_price - previousListing.unit_price);
+            if (difference < listing.unit_price * 0.01) {
+              return accumulator;
+            }
+
+            const previousListings = listings.slice(0, index);
+            const collectiveQuantityOfPreviousListings = previousListings.reduce((accumulator, listing) => (accumulator + listing.quantity), 0);
+            if (collectiveQuantityOfPreviousListings > listing.quantity) {
+              return accumulator;
+            }
+
+            return listing.unit_price;
+          };
+
+          const normalizedBuyPrice = data.buys.reduce(normalize, data.buys[0].unit_price);
+          const normalizedSellPrice = data.sells.reduce(normalize, data.sells[0].unit_price);
 
           state.prices[value] = {
-            buy: normalizedBuyPrice,
-            sell: normalizedSellPrice,
+            buy: normalizedBuyPrice + 1,
+            sell: normalizedSellPrice - 1,
             supply: data.sells.reduce((a, b) => (a + b.quantity), 0),
             buyListings: data.buys,
             sellListings: data.sells
