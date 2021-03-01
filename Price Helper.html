@@ -153,6 +153,7 @@
     const minimumSellProfit = 1000;
 
     const chestsRunCost = 10000;
+    const spoolsPerRun = 2.75;
     const spoolSellOrderVolume = 300;
 
     const init = {cache: "no-store"};
@@ -575,7 +576,7 @@
 
           const profitBuy = Math.round(
             (
-              listing.unit_price * 3
+              listing.unit_price * spoolsPerRun
               + elonianCutlassPrice * 0.05625
               + pocugPrice * 1.1225
               + pougPrice * 0.49875
@@ -591,15 +592,15 @@
             - chestsRunCost
           );
 
-          const profit = accumulator.profit + (profitBuy > 0 ? (profitBuy / 3 * listing.quantity) : 0);
-          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * chestsRunCost / 3) : 0);
+          const profit = accumulator.profit + (profitBuy > 0 ? (profitBuy / spoolsPerRun * listing.quantity) : 0);
+          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * chestsRunCost / spoolsPerRun) : 0);
 
           const markup = accumulator.markup + (profitBuy > 0 ? 
 `<tr>
   <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
   <td class="regular-text">${formatCurrency(listing.unit_price)}</td>
-  <td class="regular-text">${formatCurrency(profitBuy / 3)}</td>
-  <td class="regular-text">${formatCurrency(profitBuy / 3 * listing.quantity)}</td>
+  <td class="regular-text">${formatCurrency(profitBuy / spoolsPerRun)}</td>
+  <td class="regular-text">${formatCurrency(profitBuy / spoolsPerRun * listing.quantity)}</td>
   <td></td>
   <td></td>
 </tr>`
@@ -629,7 +630,7 @@
 
       const profitSell = Math.round(
         (
-          spoolPrice * 3
+          spoolPrice * spoolsPerRun
           + elonianCutlassPrice * 0.05625
           + pocugPrice * 1.1225
           + pougPrice * 0.49875
@@ -645,14 +646,14 @@
         - chestsRunCost
       );
 
-      const totalProfitSell = profitSell / 3 * spoolSellOrderVolume;
-      const totalCostSell = spoolSellOrderVolume * chestsRunCost / 3;
+      const totalProfitSell = profitSell / spoolsPerRun * spoolSellOrderVolume;
+      const totalCostSell = spoolSellOrderVolume * chestsRunCost / spoolsPerRun;
 
       const chestsSellRowMarkup =
 `<tr>
   <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
   <td class="regular-text">${formatCurrency(spoolPrice)}</td>
-  <td class="regular-text">${formatCurrency(profitSell / 3)}</td>
+  <td class="regular-text">${formatCurrency(profitSell / spoolsPerRun)}</td>
   <td></td>
   <td></td>
 </tr>`;
