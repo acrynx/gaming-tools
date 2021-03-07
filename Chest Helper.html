@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Chest Helper</title>
+  <style type="text/css">
+
+    html {
+      width: 100%;
+      margin: 0;
+    }
+
+    body {
+      padding: 0 100px;
+      margin: 0;
+    }
+
+    table {
+      width: 100%;
+      border: 0;
+    }
+
+    table.rares {
+      width: 50%;
+      border: 0;
+      float: left;
+      margin: 15px 0 30px 0;
+    }
+
+    td, th {
+      width: 8.333333333333%;
+      text-align: center;
+      font-size: 100px;
+      font-weight: normal;
+    }
+
+    table.rares td {
+      padding-top: 20px;
+    }
+
+    table.rares th {
+      padding-top: 20px;
+      padding-bottom: 30px;
+    }
+
+    .regular-text {
+      font-size: 30px;
+    }
+
+    .small-text {
+      font-size: 20px;
+    }
+
+    .grey {
+      color: #aaaaaa;
+    }
+
+    .blue {
+      color: #62a4da;
+    }
+
+    .pink {
+      color: #fb3e8d;
+    }
+
+    .gold {
+      color: #f0bc00;
+    }
+
+    .silver {
+      color: #aeaeae;
+    }
+
+    .copper {
+      color: #d59f61;
+    }
+
+    .checkbox {
+      vertical-align: inherit;
+      height: 14px;
+      margin-top: -20px;
+    }
+
+    .d-none {
+      display: none;
+    }
+
+    .c-pointer {
+      cursor: pointer;
+    }
+
+    input {
+      width: 100%;
+      text-align: center;
+      border: 0;
+    }
+
+  </style>
+</head>
+<body>
+
+  <table>
+    <tr>
+      <td><a href="https://www.gw2bltc.com/item/83322" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/16B233FDC5A4B1C4D631CF022B5C6348045F0DDE/1765976.png" /></a></td>
+      <td id="spool-price" class="regular-text"></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td><img id="refresh" src="https://render.guildwars2.com/file/C6A3FFF06BB4D50050D3B1FE75E3AACBFA0F8009/63129.png" class="c-pointer" /></td>
+    </tr>
+  </table>
+
+  <table class="rares" id="chests-buy"></table>
+  <table class="rares" id="chests-sell"></table>
+
+  <script type="text/javascript">
+  (() => {
+
+    const state = {
+      prices: {}
+    };
+
+    const millingStonePrice = 9;
+    const forgemetalPrice = 32;
+    const tradeContractProfit = 28;
+    const tradingPostNetProfitRatio = 0.85;
+
+    const chestsRunCost = 10000;
+    const spoolsPerRun = 2.75;
+    const spoolSellOrderVolume = 275;
+
+    const init = {cache: "no-store"};
+    const items = [
+      "83322", // spoolOfDeldrimorThread
+      "82611", // elonianCutlass
+      "85016", // pocug
+      "84731", // poug
+      "83008", // porug
+      "84688", // rotdct
+      "83261", // rotdlt
+      "83306", // rotdat
+      "76491" // blackDiamond
+    ];
+
+    const formatCurrency = (base) => {
+      const gold = Math.trunc(base / 10000);
+      const silver = Math.trunc((base - (gold * 10000)) / 100);
+      const copper = Math.trunc(base - (gold * 10000) - (silver * 100));
+
+      if (gold === 0 && silver === 0) {
+        return `<span class="copper">${copper}<span class="small-text">c</span></span>`;
+      }
+
+      if (gold === 0) {
+        return `<span class="silver">${silver}<span class="small-text">s</span></span> <span class="copper">${copper}<span class="small-text">c</span></span>`;
+      }
+
+      return `<span class="gold">${gold}<span class="small-text">g</span></span> <span class="silver">${silver}<span class="small-text">s</span></span> <span class="copper">${copper}<span class="small-text">c</span></span>`;
+    };
+
+    const formatPercent = (base) => {
+      const percent = (base * 100).toFixed(2);
+
+      return `${percent}<span class="small-text">%</span>`;
+    };
+
+    const renderPrices = () => {
+      const spoolPrice = state.prices["83322"].sell;
+      document.getElementById("spool-price").innerHTML = formatCurrency(spoolPrice);
+    };
+
+    const renderChests = () => {
+      const spoolPrice = state.prices["83322"].sell;
+      const elonianCutlassPrice = state.prices["82611"].buy;
+      const pocugPrice = state.prices["85016"].sell;
+      const pougPrice = state.prices["84731"].sell;
+      const porugPrice = state.prices["83008"].sell;
+      const rotdctPrice = state.prices["84688"].buy;
+      const rotdltPrice = state.prices["83261"].buy;
+      const rotdatPrice = state.prices["83306"].buy;
+      const blackDiamondPrice = state.prices["76491"].sell;
+
+      const totalBuy = state.prices["83322"].buyListings.reduce(
+        (accumulator, listing) => {
+
+          const profitBuy = Math.round(
+            (
+              listing.unit_price * spoolsPerRun
+              + elonianCutlassPrice * 0.05625
+              + pocugPrice * 1.1225
+              + pougPrice * 0.49875
+              + porugPrice * 0.06375
+              + rotdctPrice * 0.04875
+              + rotdltPrice * 0.04875
+              + rotdatPrice * 0.04875
+              + blackDiamondPrice * 0.01
+            ) * tradingPostNetProfitRatio
+            + millingStonePrice * 1.315
+            + forgemetalPrice * 0.90625
+            + tradeContractProfit * 4.75
+            - chestsRunCost
+          );
+
+          const profit = accumulator.profit + (profitBuy > 0 ? (profitBuy / spoolsPerRun * listing.quantity) : 0);
+          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * chestsRunCost / spoolsPerRun) : 0);
+
+          const markup = accumulator.markup + (profitBuy > 0 ? 
+`<tr>
+  <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
+  <td class="regular-text">${formatCurrency(listing.unit_price)}</td>
+  <td class="regular-text">${formatCurrency(profitBuy / spoolsPerRun)}</td>
+  <td class="regular-text">${formatCurrency(profitBuy / spoolsPerRun * listing.quantity)}</td>
+  <td></td>
+  <td></td>
+</tr>`
+           : "");
+
+          return {
+            profit,
+            cost,
+            markup
+          }
+        },
+        {
+          profit: 0,
+          cost: 0,
+          markup: ""
+        }
+      );
+
+      const chestsBuyHeader =
+`<tr>
+  <th></th>
+  <th class="regular-text blue">${formatCurrency(totalBuy.cost)}</td>
+  <th class="regular-text blue">${formatPercent(totalBuy.profit / totalBuy.cost)}</td>
+  <th class="regular-text blue">${formatCurrency(totalBuy.profit)}</td>
+  <th></th>
+</tr>`;
+
+      const profitSell = Math.round(
+        (
+          spoolPrice * spoolsPerRun
+          + elonianCutlassPrice * 0.05625
+          + pocugPrice * 1.1225
+          + pougPrice * 0.49875
+          + porugPrice * 0.06375
+          + rotdctPrice * 0.04875
+          + rotdltPrice * 0.04875
+          + rotdatPrice * 0.04875
+          + blackDiamondPrice * 0.01
+        ) * tradingPostNetProfitRatio
+        + millingStonePrice * 1.315
+        + forgemetalPrice * 0.90625
+        + tradeContractProfit * 4.75
+        - chestsRunCost
+      );
+
+      const totalProfitSell = profitSell / spoolsPerRun * spoolSellOrderVolume;
+      const totalCostSell = spoolSellOrderVolume * chestsRunCost / spoolsPerRun;
+
+      const chestsSellRowMarkup =
+`<tr>
+  <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
+  <td class="regular-text">${formatCurrency(spoolPrice)}</td>
+  <td class="regular-text">${formatCurrency(profitSell / spoolsPerRun)}</td>
+  <td></td>
+  <td></td>
+</tr>`;
+
+      const chestsSellHeader =
+`<tr>
+  <th></th>
+  <th class="regular-text">${formatCurrency(totalCostSell)}</td>
+  <th class="regular-text blue">${formatPercent(totalProfitSell / totalCostSell)}</td>
+  <th class="regular-text">${formatCurrency(totalProfitSell)}</td>
+  <th></th>
+</tr>`;
+      
+      document.getElementById("chests-buy").innerHTML = chestsBuyHeader + totalBuy.markup;
+      document.getElementById("chests-sell").innerHTML = chestsSellHeader + chestsSellRowMarkup;
+    };
+
+    const fetchPrices = () => {
+      items.forEach((value) => {
+        fetch(`https://api.guildwars2.com/v2/commerce/listings/${value}`, init)
+        .then((response) => response.json())
+        .then((data) => {
+
+          const normalize = (accumulator, listing, index, listings) => {
+            const previousListing = listings[index - 1];
+            if ( ! previousListing) {
+              return accumulator;
+            }
+
+            const difference = Math.abs(listing.unit_price - previousListing.unit_price);
+            if (difference < listing.unit_price * 0.01) {
+              return accumulator;
+            }
+
+            const previousListings = listings.slice(0, index);
+            const collectiveQuantityOfPreviousListings = previousListings.reduce((accumulator, listing) => (accumulator + listing.quantity), 0);
+            if (collectiveQuantityOfPreviousListings > listing.quantity) {
+              return accumulator;
+            }
+
+            return listing.unit_price;
+          };
+
+          const normalizedBuyPrice = data.buys.reduce(normalize, data.buys[0].unit_price);
+          const normalizedSellPrice = data.sells.reduce(normalize, data.sells[0].unit_price);
+
+          state.prices[value] = {
+            buy: normalizedBuyPrice + 1,
+            sell: normalizedSellPrice - 1,
+            supply: data.sells.reduce((a, b) => (a + b.quantity), 0),
+            buyListings: data.buys,
+            sellListings: data.sells
+          }
+
+          render();
+        });
+      });
+    };
+
+    const render = () => {
+      if (
+        Object.keys(state.prices).length !== items.length
+      ) {
+        return;
+      }
+
+      renderPrices();
+      renderChests();
+    };
+    
+    document.getElementById("refresh").onclick = fetchPrices;
+
+    fetchPrices();
+  })();
+  </script>
+</body>
+</html>

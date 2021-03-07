@@ -121,16 +121,13 @@
       <td id="mithril-ore-price" class="regular-text c-pointer"></td>
       <td><a href="https://www.gw2bltc.com/item/19748" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/021DA825F2092327B1C6BC09EC77BD5DE5B4770D/65961.png" /></a></td>
       <td id="silk-price" class="regular-text"></td>
-      <td><a href="https://www.gw2bltc.com/item/83322" target="_blank"><img id="silk" src="https://render.guildwars2.com/file/16B233FDC5A4B1C4D631CF022B5C6348045F0DDE/1765976.png" /></a></td>
-      <td id="spool-price" class="regular-text"></td>
+      <td></td>
+      <td class="small-text"><input id="target-ecto-price" type="number" size="4" /></td>
     </tr>
   </table>
 
   <table class="rares" id="rares-sell"></table>
   <table class="rares" id="rares-buy"></table>
-
-  <table class="rares" id="chests-buy"></table>
-  <table class="rares" id="chests-sell"></table>
 
   <script type="text/javascript">
   (() => {
@@ -141,9 +138,6 @@
     };
 
     const motePrice = 8;
-    const millingStonePrice = 9;
-    const forgemetalPrice = 32;
-    const tradeContractProfit = 28;
     const salvageCost = 60;
     const tradingPostNetProfitRatio = 0.85;
 
@@ -151,10 +145,6 @@
     const rareBuyOrderVolume = 111;
     const minimumBuyProfit = 10;
     const minimumSellProfit = 1000;
-
-    const chestsRunCost = 10000;
-    const spoolsPerRun = 2.75;
-    const spoolSellOrderVolume = 275;
 
     const init = {cache: "no-store"};
     const items = [
@@ -166,15 +156,6 @@
       "19745", // gossamer
       "19700", // mithrilOre
       "19701", // orichalcumOre
-      "83322", // spoolOfDeldrimorThread
-      "82611", // elonianCutlass
-      "85016", // pocug
-      "84731", // poug
-      "83008", // porug
-      "84688", // rotdct
-      "83261", // rotdlt
-      "83306", // rotdat
-      "76491" // blackDiamond
     ];
 
     const rares = {
@@ -367,7 +348,7 @@
       return `${percent}<span class="small-text">%</span>`;
     };
 
-    const renderEcto = () => {
+    const renderPrices = () => {
       const ectoPrice = Math.max(state.prices["19721"].sell, state.medianPrices["19721"].sell);
       const charmPrice = state.prices["89103"].sell;
       const hardenedLeatherPrice = state.prices["19732"].sell;
@@ -376,7 +357,6 @@
       const gossamerPrice = state.prices["19745"].sell;
       const mithrilOrePrice = state.prices["19700"].sell;
       const orichalcumOrePrice = state.prices["19701"].sell;
-      const spoolPrice = state.prices["83322"].sell;
 
       document.getElementById("ecto-price").innerHTML = formatCurrency(ectoPrice);
       document.getElementById("charm-price").innerHTML = formatCurrency(charmPrice);
@@ -386,11 +366,14 @@
       document.getElementById("gossamer-price").innerHTML = formatCurrency(gossamerPrice);
       document.getElementById("mithril-ore-price").innerHTML = formatCurrency(mithrilOrePrice);
       document.getElementById("orichalcum-ore-price").innerHTML = formatCurrency(orichalcumOrePrice);
-      document.getElementById("spool-price").innerHTML = formatCurrency(spoolPrice);
+
+      if ( ! document.getElementById("target-ecto-price").value) {
+        document.getElementById("target-ecto-price").value = ectoPrice;
+      }
     };
 
     const renderRares = () => {
-      const ectoPrice = Math.max(state.prices["19721"].sell, state.medianPrices["19721"].sell);
+      const targetEctoPrice = document.getElementById("target-ecto-price").value;
       const charmPrice = state.prices["89103"].sell;
       const hardenedLeatherPrice = state.prices["19732"].sell;
       const thickLeatherPrice = state.prices["19729"].sell;
@@ -405,7 +388,7 @@
         const rare = rares[id];
         const threshold = Math.round(
           (
-            ectoPrice * 0.875
+            targetEctoPrice * 0.875
             + charmPrice * 0.032
             + motePrice * 1.6
             + (rare["19700"] === undefined ? 0 : mithrilOrePrice * rare["19700"])
@@ -456,7 +439,7 @@
         const rare = rares[id];
         const threshold = Math.round(
           (
-            ectoPrice * 0.875
+            targetEctoPrice * 0.875
             + charmPrice * 0.032
             + motePrice * 1.6
             + (rare["19700"] === undefined ? 0 : mithrilOrePrice * rare["19700"])
@@ -560,117 +543,6 @@
       document.getElementById("rares-sell").innerHTML = raresSellHeader + resultsSell.map((result) => result.markup).join("");
     };
 
-    const renderChests = () => {
-      const spoolPrice = state.prices["83322"].sell;
-      const elonianCutlassPrice = state.prices["82611"].buy;
-      const pocugPrice = state.prices["85016"].sell;
-      const pougPrice = state.prices["84731"].sell;
-      const porugPrice = state.prices["83008"].sell;
-      const rotdctPrice = state.prices["84688"].buy;
-      const rotdltPrice = state.prices["83261"].buy;
-      const rotdatPrice = state.prices["83306"].buy;
-      const blackDiamondPrice = state.prices["76491"].sell;
-
-      const totalBuy = state.prices["83322"].buyListings.reduce(
-        (accumulator, listing) => {
-
-          const profitBuy = Math.round(
-            (
-              listing.unit_price * spoolsPerRun
-              + elonianCutlassPrice * 0.05625
-              + pocugPrice * 1.1225
-              + pougPrice * 0.49875
-              + porugPrice * 0.06375
-              + rotdctPrice * 0.04875
-              + rotdltPrice * 0.04875
-              + rotdatPrice * 0.04875
-              + blackDiamondPrice * 0.01
-            ) * tradingPostNetProfitRatio
-            + millingStonePrice * 1.315
-            + forgemetalPrice * 0.90625
-            + tradeContractProfit * 4.75
-            - chestsRunCost
-          );
-
-          const profit = accumulator.profit + (profitBuy > 0 ? (profitBuy / spoolsPerRun * listing.quantity) : 0);
-          const cost = accumulator.cost + (profitBuy > 0 ? (listing.quantity * chestsRunCost / spoolsPerRun) : 0);
-
-          const markup = accumulator.markup + (profitBuy > 0 ? 
-`<tr>
-  <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
-  <td class="regular-text">${formatCurrency(listing.unit_price)}</td>
-  <td class="regular-text">${formatCurrency(profitBuy / spoolsPerRun)}</td>
-  <td class="regular-text">${formatCurrency(profitBuy / spoolsPerRun * listing.quantity)}</td>
-  <td></td>
-  <td></td>
-</tr>`
-           : "");
-
-          return {
-            profit,
-            cost,
-            markup
-          }
-        },
-        {
-          profit: 0,
-          cost: 0,
-          markup: ""
-        }
-      );
-
-      const chestsBuyHeader =
-`<tr>
-  <th></th>
-  <th class="regular-text blue">${formatCurrency(totalBuy.cost)}</td>
-  <th class="regular-text blue">${formatPercent(totalBuy.profit / totalBuy.cost)}</td>
-  <th class="regular-text blue">${formatCurrency(totalBuy.profit)}</td>
-  <th></th>
-</tr>`;
-
-      const profitSell = Math.round(
-        (
-          spoolPrice * spoolsPerRun
-          + elonianCutlassPrice * 0.05625
-          + pocugPrice * 1.1225
-          + pougPrice * 0.49875
-          + porugPrice * 0.06375
-          + rotdctPrice * 0.04875
-          + rotdltPrice * 0.04875
-          + rotdatPrice * 0.04875
-          + blackDiamondPrice * 0.01
-        ) * tradingPostNetProfitRatio
-        + millingStonePrice * 1.315
-        + forgemetalPrice * 0.90625
-        + tradeContractProfit * 4.75
-        - chestsRunCost
-      );
-
-      const totalProfitSell = profitSell / spoolsPerRun * spoolSellOrderVolume;
-      const totalCostSell = spoolSellOrderVolume * chestsRunCost / spoolsPerRun;
-
-      const chestsSellRowMarkup =
-`<tr>
-  <td class="small-text grey"><input type="text" readonly="readonly" value="Spule Deldrimor-Faden" onclick="select(); document.execCommand('copy');" size="30" /></td>
-  <td class="regular-text">${formatCurrency(spoolPrice)}</td>
-  <td class="regular-text">${formatCurrency(profitSell / spoolsPerRun)}</td>
-  <td></td>
-  <td></td>
-</tr>`;
-
-      const chestsSellHeader =
-`<tr>
-  <th></th>
-  <th class="regular-text">${formatCurrency(totalCostSell)}</td>
-  <th class="regular-text blue">${formatPercent(totalProfitSell / totalCostSell)}</td>
-  <th class="regular-text">${formatCurrency(totalProfitSell)}</td>
-  <th></th>
-</tr>`;
-      
-      document.getElementById("chests-buy").innerHTML = chestsBuyHeader + totalBuy.markup;
-      document.getElementById("chests-sell").innerHTML = chestsSellHeader + chestsSellRowMarkup;
-    };
-
     const fetchPrices = () => {
       items.forEach((value) => {
         fetch(`https://www.gw2spidy.com/api/v0.9/json/listings/${value}/sell/1`, init)
@@ -757,11 +629,25 @@
         return;
       }
 
-      renderEcto();
+      renderPrices();
       renderRares();
-      renderChests();
     };
-    
+
+    document.getElementById("target-ecto-price").onwheel = (event) => {
+      event.preventDefault();
+      event.deltaY < 0 ? document.getElementById("target-ecto-price").stepUp() : document.getElementById("target-ecto-price").stepDown();
+      document.getElementById("target-ecto-price").onchange();
+    };
+
+    document.getElementById("ecto-price").onclick = () => {
+      if ( ! state.prices["19721"].sell || ! state.medianPrices["19721"].sell) {
+        return;
+      }
+      document.getElementById("target-ecto-price").value = Math.max(state.prices["19721"].sell, state.medianPrices["19721"].sell);
+      render();
+    }
+
+    document.getElementById("target-ecto-price").onchange = render;
     document.getElementById("efficient").onchange = render;
     document.getElementById("refresh").onclick = fetchPrices;
 
